@@ -14,25 +14,15 @@ function playBeep() {
     });
 }
 
+
 function showNotification() {
-    const notificationOptions = {
+    chrome.notifications.create({
         type: "basic",
-        iconUrl: "icon128.png",
+        iconUrl: "icon.png",
         title: "Pomodoro Timer",
         message: "Time's up!",
-    };
-    chrome.notifications.create("timerEndNotification", notificationOptions);
+    });
 }
-
-
-chrome.runtime.onConnect.addListener(function (port) {
-    if (port.name === "popup") {
-        popupPort = port;
-        port.onDisconnect.addListener(() => {
-            popupPort = null;
-        });
-    }
-});
 
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === "popup") {
@@ -52,16 +42,17 @@ chrome.runtime.onConnect.addListener((port) => {
                     timerInterval = setInterval(() => {
                         const remainingTime = timerState.endTime - new Date().getTime();
                         if (remainingTime <= 0) {
+                            showNotification();
                             timerState.running = false;
                             timerState.endTime = null;
                             clearInterval(timerInterval);
 
                             if (popupPort) {
-                                popupPort.postMessage({ action: "stopTimer" });
+                                popupPort.postMessage({ action: "timerEnded" });
                             }
 
                             playBeep();
-                            showNotification();
+
                         }
                     }, 1000);
                 }
@@ -73,5 +64,3 @@ chrome.runtime.onConnect.addListener((port) => {
         });
     }
 });
-
-
