@@ -40,6 +40,10 @@ window.onload = function () {
                         timerElement.style.backgroundColor = "red";
                         beepAudio.play();
                         showNotification();
+                        updateTimerDisplay(timerDuration);
+                        timerState.running = false;
+                        timersState.endTime = null;
+                        chrome.runtime.sendMessage({ action: "stopTimer" });
                     }
                 }
             });
@@ -101,6 +105,16 @@ window.onload = function () {
                 timerDuration = Math.floor(remainingTime / 1000);
                 startButton.disabled = true;
                 stopButton.disabled = false;
+                startCountdown();
             } else {
                 timerState.running = false;
                 timerState.endTime = null;
+            }
+        }
+
+        updateTimerDisplay(timerDuration);
+        startButton.disabled = timerState.running;
+        stopButton.disabled = !timerState.running;
+    });
+};
+
