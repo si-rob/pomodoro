@@ -7,13 +7,30 @@ window.onload = function () {
 
     let timerInterval;
     let timerDuration = 25 * 60; // Default duration: 25 minutes
-    const beepAudio = new Audio(chrome.runtime.getURL("beep.mp3"));
 
     function updateTimerDisplay(duration) {
         const minutes = Math.floor(duration / 60);
         const seconds = duration % 60;
         timerElement.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
+
+    function updateRemainingTime() {
+        chrome.runtime.sendMessage({ action: "getTimerState" }, function (timerState) {
+            if (timerState.running) {
+                const remainingTime = timerState.endTime - new Date().getTime();
+                if (remainingTime > 0) {
+                    const remainingSeconds = Math.floor(remainingTime / 1000);
+                    updateTimerDisplay(remainingSeconds);
+                } else {
+                    timerElement.style.backgroundColor = "red";
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    updateTimerDisplay(timerDuration);
+                }
+            }
+        });
+    }
+
 
     function showNotification() {
         const notificationOptions = {
@@ -23,31 +40,6 @@ window.onload = function () {
             message: "Time's up!",
         };
         chrome.notifications.create("timerEndNotification", notificationOptions);
-    }
-
-    function startCountdown() {
-        timerInterval = setInterval(function () {
-            chrome.runtime.sendMessage({ action: "getTimerState" }, function (timerState) {
-                if (timerState.running) {
-                    const remainingTime = timerState.endTime - new Date().getTime();
-                    if (remainingTime > 0) {
-                        const remainingSeconds = Math.floor(remainingTime / 1000);
-                        updateTimerDisplay(remainingSeconds);
-                    } else {
-                        clearInterval(timerInterval);
-                        startButton.disabled = false;
-                        stopButton.disabled = true;
-                        timerElement.style.backgroundColor = "red";
-                        beepAudio.play();
-                        showNotification();
-                        updateTimerDisplay(timerDuration);
-                        timerState.running = false;
-                        timersState.endTime = null;
-                        chrome.runtime.sendMessage({ action: "stopTimer" });
-                    }
-                }
-            });
-        }, 1000);
     }
 
     function startTimer() {
@@ -60,8 +52,6 @@ window.onload = function () {
                 console.log(response.result);
             }
         );
-
-        startCountdown();
     }
 
     function stopTimer() {
@@ -105,7 +95,7 @@ window.onload = function () {
                 timerDuration = Math.floor(remainingTime / 1000);
                 startButton.disabled = true;
                 stopButton.disabled = false;
-                startCountdown();
+                updateRemainingTime();
             } else {
                 timerState.running = false;
                 timerState.endTime = null;
@@ -115,6 +105,7 @@ window.onload = function () {
         updateTimerDisplay(timerDuration);
         startButton.disabled = timerState.running;
         stopButton.disabled = !timerState.running;
+        setInterval(updateRemainingTime, 1000);
     });
 };
 

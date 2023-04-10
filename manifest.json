@@ -5,7 +5,8 @@
     "description": "A simple Pomodoro timer extension built using ChatGPT Plus (GPT 4)",
     "permissions": [
         "notifications",
-        "storage"
+        "storage",
+        "tts"
     ],
     "action": {
         "default_popup": "popup.html",
