@@ -1,41 +1,34 @@
-let timerInterval;
+let timerState = {
+    running: false,
+    endTime: null,
+};
 
-function updateTimerState(newState) {
-    chrome.storage.local.set({ timerState: newState });
+function startTimer(timerDuration) {
+    timerState.running = true;
+    timerState.endTime = new Date().getTime() + timerDuration * 1000;
+    chrome.storage.local.set({ timerState: timerState });
+}
+
+function stopTimer() {
+    timerState.running = false;
+    timerState.endTime = null;
+    chrome.storage.local.set({ timerState: timerState });
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.action === "startTimer") {
-        const endTime = new Date().getTime() + request.timerDuration * 1000;
-
-        timerInterval = setInterval(() => {
-            const remainingTime = endTime - new Date().getTime();
-            if (remainingTime <= 0) {
-                clearInterval(timerInterval);
-                updateTimerState({ running: false });
-            }
-        }, 1000);
-
-        updateTimerState({ running: true, endTime: endTime });
-
+        startTimer(request.timerDuration);
         sendResponse({ result: "Timer started" });
     } else if (request.action === "stopTimer") {
-        clearInterval(timerInterval);
-
-        updateTimerState({ running: false });
-
+        stopTimer();
         sendResponse({ result: "Timer stopped" });
     } else if (request.action === "getTimerState") {
         chrome.storage.local.get("timerState", function (data) {
-            sendResponse(data.timerState);
+            if (data.timerState) {
+                timerState = data.timerState;
+            }
+            sendResponse(timerState);
         });
         return true; // Required to use sendResponse asynchronously
-    }
-});
-
-chrome.alarms.onAlarm.addListener(function (alarm) {
-    if (alarm.name === "pomodoroTimer") {
-        // Play an alarm sound or show a notification
-        updateTimerState({ running: false });
     }
 });

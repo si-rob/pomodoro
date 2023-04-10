@@ -2,19 +2,25 @@
     "manifest_version": 3,
     "name": "Pomodoro Timer",
     "version": "1.0",
-    "description": "A simple Pomodoro timer Chrome extension",
-    "action": {
-        "default_icon": "icon.png",
-        "default_popup": "popup.html"
-    },
+    "description": "A simple Pomodoro timer extension built using ChatGPT Plus (GPT 4)",
     "permissions": [
-        "alarms",
+        "notifications",
         "storage"
     ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon16.png",
+            "48": "icon48.png",
+            "128": "icon128.png"
+        }
+    },
     "background": {
         "service_worker": "background.js"
     },
     "icons": {
-        "48": "icon.png"
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
     }
 }

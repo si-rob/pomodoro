@@ -7,11 +7,22 @@ window.onload = function () {
 
     let timerInterval;
     let timerDuration = 25 * 60; // Default duration: 25 minutes
+    const beepAudio = new Audio(chrome.runtime.getURL("beep.mp3"));
 
     function updateTimerDisplay(duration) {
         const minutes = Math.floor(duration / 60);
         const seconds = duration % 60;
         timerElement.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function showNotification() {
+        const notificationOptions = {
+            type: "basic",
+            iconUrl: "icon128.png",
+            title: "Pomodoro Timer",
+            message: "Time's up!",
+        };
+        chrome.notifications.create("timerEndNotification", notificationOptions);
     }
 
     function startCountdown() {
@@ -26,6 +37,9 @@ window.onload = function () {
                         clearInterval(timerInterval);
                         startButton.disabled = false;
                         stopButton.disabled = true;
+                        timerElement.style.backgroundColor = "red";
+                        beepAudio.play();
+                        showNotification();
                     }
                 }
             });
@@ -69,28 +83,24 @@ window.onload = function () {
     }
 
     customDurationInput.addEventListener("change", function () {
-        const customDuration = parseInt(this.value);
+        const customDuration = parseFloat(this.value);
         if (!isNaN(customDuration) && customDuration > 0) {
             timerDuration = customDuration * 60;
             updateTimerDisplay(timerDuration);
+        } else {
+            this.value = timerDuration / 60;
         }
     });
 
-    // Fetch the timer state when the popup is opened
     chrome.runtime.sendMessage({ action: "getTimerState" }, function (timerState) {
         timerState = timerState || { running: false }; // Provide a default timer state if not defined
 
         if (timerState.running) {
             const remainingTime = timerState.endTime - new Date().getTime();
             if (remainingTime > 0) {
-                const remainingSeconds = Math.floor(remainingTime / 1000);
-                updateTimerDisplay(remainingSeconds);
+                timerDuration = Math.floor(remainingTime / 1000);
                 startButton.disabled = true;
                 stopButton.disabled = false;
-
-                // Call startCountdown if the timer is already running when the popup is opened
-                startCountdown();
-            }
-        }
-    });
-};
+            } else {
+                timerState.running = false;
+                timerState.endTime = null;
