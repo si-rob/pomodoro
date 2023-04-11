@@ -3,7 +3,8 @@
 ## Pomodoro Timer Chrome Extension
 This is a Pomodoro Timer Chrome extension as an experiment written exclusively using ChatGPT Plus. All code is generated 100% from ChatGPT. Using GPT4 model.
 
-## The Pomodoro Technique is a time management method that uses a timer to break down work into intervals, traditionally 25 minutes in length, separated by short breaks. This technique aims to improve productivity by allowing individuals to focus on work in short, uninterrupted bursts.
+## What is Pomodoro? 
+The Pomodoro Technique is a time management method that uses a timer to break down work into intervals, traditionally 25 minutes in length, separated by short breaks. This technique aims to improve productivity by allowing individuals to focus on work in short, uninterrupted bursts.
 
 ## Usage
 As an end user, you can download the extension from the Chrome Web Store and add it to your Chrome browser. Once added, you can click on the extension icon to open the popup window. From the popup, you can select a preset timer (10 minutes, 25 minutes, or 60 minutes) or enter a custom duration in minutes. Click the "Start" button to begin the timer, and the countdown will begin. When the timer ends, you will receive a notification and an audio alert.
