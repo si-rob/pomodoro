@@ -6,7 +6,8 @@
     "permissions": [
         "notifications",
         "storage",
-        "tts"
+        "tts",
+        "alarms"
     ],
     "action": {
         "default_popup": "popup.html",

@@ -1,3 +1,4 @@
+
 let timerState = {
     running: false,
     endTime: null,
@@ -24,6 +25,16 @@ function showNotification() {
     });
 }
 
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "pomodoro") {
+        showNotification();
+        playBeep();
+        if (popupPort) {
+            popupPort.postMessage({ action: "timerEnded" });
+        }
+    }
+});
+
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === "popup") {
         popupPort = port;
@@ -38,11 +49,11 @@ chrome.runtime.onConnect.addListener((port) => {
                 if (!timerState.running) {
                     timerState.running = true;
                     timerState.endTime = new Date().getTime() + request.duration * 1000;
+                    chrome.alarms.create("pomodoro", { when: timerState.endTime });
 
                     timerInterval = setInterval(() => {
                         const remainingTime = timerState.endTime - new Date().getTime();
                         if (remainingTime <= 0) {
-                            showNotification();
                             timerState.running = false;
                             timerState.endTime = null;
                             clearInterval(timerInterval);
@@ -50,9 +61,6 @@ chrome.runtime.onConnect.addListener((port) => {
                             if (popupPort) {
                                 popupPort.postMessage({ action: "timerEnded" });
                             }
-
-                            playBeep();
-
                         }
                     }, 1000);
                 }
