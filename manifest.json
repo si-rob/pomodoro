@@ -5,7 +5,6 @@
     "description": "A simple Pomodoro timer extension built using ChatGPT Plus (GPT 4)",
     "permissions": [
         "notifications",
-        "storage",
         "tts",
         "alarms"
     ],
